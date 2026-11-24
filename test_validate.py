@@ -312,6 +312,15 @@ class SidecarKeysAndTypes(Scratch):
         self.break_manifest('scenario = "an account whose optional fields are all absent"\n', "")
         self.assert_problem("missing key(s): scenario")
 
+    def test_scenario_with_numeric_counts_is_refused(self) -> None:
+        self.break_manifest(
+            'scenario = "an account whose optional fields are all absent"',
+            'scenario = "an issuer account with auth_required set, two signers at weight 1 and 150 sponsored entries"',
+        )
+        self.assert_problem(
+            "scenario must not contain numeric counts; describe intent in plain words"
+        )
+
     def test_schema_version_from_the_future_is_refused(self) -> None:
         self.break_manifest("schema_version = 1", "schema_version = 2")
         self.assert_problem("schema_version 2, this tool reads 1")
@@ -543,7 +552,12 @@ class SyntheticFixtures(Scratch):
     def synthetic(self, **field_overrides) -> Fixture:
         fixture = self.fixtures["plain"]
         fixture.header = "# Hand-authored specimen, not a capture."
-        fixture.fields.update({"kind": "synthetic", "scenario": "synthetic: thresholds at 1/2/3"})
+        fixture.fields.update(
+            {
+                "kind": "synthetic",
+                "scenario": "synthetic: thresholds at low and med and high",
+            }
+        )
         for key in ("source_url", "captured_at", "ledger", "horizon_version", "sha256"):
             fixture.fields.pop(key)
         fixture.fields.update(field_overrides)
@@ -559,7 +573,7 @@ class SyntheticFixtures(Scratch):
         self.assert_problem("synthetic fixture carries provenance it cannot have: ledger")
 
     def test_scenario_must_say_it_is_synthetic(self) -> None:
-        self.synthetic(scenario="thresholds at 1/2/3")
+        self.synthetic(scenario="thresholds at low and med and high")
         self.assert_problem("synthetic fixture must say so at the start of scenario")
 
     def test_synthetic_shape_is_still_checked_against_bytes(self) -> None:

@@ -2,7 +2,7 @@
 schema_version = 1
 id = "issuer-auth-required"
 kind = "captured"
-scenario = "an issuer account with auth_required set, two signers at weight 1 and 150 sponsored entries"
+scenario = "an issuer account with auth_required set, two signers at weight one and sponsored entries"
 account_id = "GD3ZN2T6QQMKLAGKKMWHHY4FITANVJBTREEJERHTWGWF2GSBPOSHGCLU"
 network = "public"
 source_url = "https://horizon.stellar.org/accounts/GD3ZN2T6QQMKLAGKKMWHHY4FITANVJBTREEJERHTWGWF2GSBPOSHGCLU"

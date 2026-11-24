@@ -51,7 +51,7 @@ schema does not define is a key no consumer will read.
 | `schema_version` | required | required | Integer. This corpus is `1`; see section 7. |
 | `id` | required | required | Kebab-case, equal to the directory name. |
 | `kind` | required | required | `captured` or `synthetic`. |
-| `scenario` | required | required | One printable, single-line sentence on what the shape is for, in plain words, at most 200 characters; no control characters or newlines. |
+| `scenario` | required | required | One printable, single-line sentence on what the shape is for, in plain words, at most 200 characters; no control characters or newlines; no numeric counts. |
 | `account_id` | required | required | `G...` ed25519 account id, checksum included. |
 | `network` | required | required | `public` or `testnet`. |
 | `shape` | required | required | Sorted list of the labels in section 5, each label at most once. |
@@ -76,7 +76,7 @@ Captured fixture example:
 schema_version = 1
 id = "default-plain"
 kind = "captured"
-scenario = "one signer which is the master key at weight 1, all thresholds zero and no optional fields, the account a rule has to leave alone"
+scenario = "one signer which is the master key at weight one, all thresholds zero and no optional fields, the account a rule has to leave alone"
 account_id = "GA7DTK7GPOEQGXHI7MLA2OAIEL4365VG6PXUAVREMDVLC4MJIJ62KR75"
 network = "public"
 shape = [
@@ -177,9 +177,9 @@ Two reading notes:
   validator concern, not a crash.
 
 `scenario` is one printable, single-line sentence of at most 200 characters. `validate.py`
-refuses control characters, newlines, non-string values and longer text, and
-`tools/capture.py` refuses the same values before it makes a request. Keep the numbers in
-it out of the way: it describes why a fixture exists, and `shape` is the machine-readable
+refuses control characters, newlines, non-string values, longer text, and numeric counts,
+and `tools/capture.py` refuses the same values before it makes a request. Keep numbers out
+of it: it describes why a fixture exists in plain words, and `shape` is the machine-readable
 part.
 
 ## 6. Root documents

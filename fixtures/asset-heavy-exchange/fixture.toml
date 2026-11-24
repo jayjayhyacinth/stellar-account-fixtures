@@ -2,7 +2,7 @@
 schema_version = 1
 id = "asset-heavy-exchange"
 kind = "captured"
-scenario = "37 trustlines and a home domain, the account shape that makes a naive response body large"
+scenario = "many trustlines and a home domain, the account shape that makes a naive response body large"
 account_id = "GDAYKKYOJ545SUQZ4V26IOHRN6K4VGLAZXK2EOGJCYG4SGRZSA5EOY2S"
 network = "public"
 source_url = "https://horizon.stellar.org/accounts/GDAYKKYOJ545SUQZ4V26IOHRN6K4VGLAZXK2EOGJCYG4SGRZSA5EOY2S"

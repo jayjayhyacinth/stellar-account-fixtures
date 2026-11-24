@@ -85,7 +85,7 @@ seed-shaped string (`S...`) is refused by both the capture tool and the validato
 | Indicator | Value | Source |
 |---|---|---|
 | Verified Captures | **9 accounts** (8 Mainnet, 1 Test) | `fixtures/` |
-| Test Suite | **274 passing** | `python -m unittest` |
+| Test Suite | **280 passing** | `python -m unittest` |
 | Integrity Assurance | **SHA-256 sidecars verified** | `validate.py` |
 | Safety Invariant | **Zero secret keys (`S...`)** | Validator enforced |
 <!-- METRICS:END -->
@@ -99,14 +99,14 @@ A cryptographic specimen vault and ledger matrix is published at **[https://post
 <!-- ACCOUNTS:START -->
 | Fixture | Why it is here |
 |---|---|
-| `asset-heavy-exchange` | 37 trustlines and a home domain, the account shape that makes a naive response body large |
-| `coordinator-data-entry` | one data entry named config.multisig.coordinator, nine signers with the master key at weight 0 and all three thresholds at 2, the shape a hosted multisig coordinator leaves on chain |
-| `default-plain` | one signer which is the master key at weight 1, all thresholds zero and no optional fields, the account a rule has to leave alone |
-| `domain-and-inflation` | home_domain lobstr.co with an inflation destination and two sponsorships, a well-formed SEP-1 candidate |
-| `issuer-auth-required` | an issuer account with auth_required set, two signers at weight 1 and 150 sponsored entries |
-| `multisig-custody` | two signers, master weight 2 and nonzero thresholds, the shape a shared custody account leaves on chain |
-| `sponsored-trustlines` | num_sponsored 17 against num_sponsoring 0: seventeen balances and two signers, the account whose own entries are paid for by someone else, which no earlier capture showed |
-| `testnet-multisig` | six signers on testnet, master weight 0 and all three thresholds at 3, the first capture that runs the testnet branch of the validator |
+| `asset-heavy-exchange` | many trustlines and a home domain, the account shape that makes a naive response body large |
+| `coordinator-data-entry` | one data entry named config.multisig.coordinator, multiple signers with the master key at weight zero and equal nonzero thresholds, the shape a hosted multisig coordinator leaves on chain |
+| `default-plain` | one signer which is the master key at weight one, all thresholds zero and no optional fields, the account a rule has to leave alone |
+| `domain-and-inflation` | home_domain lobstr.co with an inflation destination and sponsorships, a well-formed SEP candidate |
+| `issuer-auth-required` | an issuer account with auth_required set, two signers at weight one and sponsored entries |
+| `multisig-custody` | two signers, master weight two and nonzero thresholds, the shape a shared custody account leaves on chain |
+| `sponsored-trustlines` | sponsored trustlines with two signers, the account whose own entries are paid for by someone else, which no earlier capture showed |
+| `testnet-multisig` | multiple signers on testnet, master weight zero and nonzero thresholds, the first capture that runs the testnet branch of the validator |
 | `whitespace-home-domain` | home_domain is a single space, which a tool that trims before validating reads as absent |
 <!-- ACCOUNTS:END -->
 

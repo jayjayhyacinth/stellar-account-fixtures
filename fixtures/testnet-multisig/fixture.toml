@@ -2,7 +2,7 @@
 schema_version = 1
 id = "testnet-multisig"
 kind = "captured"
-scenario = "six signers on testnet, master weight 0 and all three thresholds at 3, the first capture that runs the testnet branch of the validator"
+scenario = "multiple signers on testnet, master weight zero and nonzero thresholds, the first capture that runs the testnet branch of the validator"
 account_id = "GCI76XDVHDGJMZGP5EWQYCZCYIBNBVABLPHWCKEZWJF2K4Z5SD74A4AV"
 network = "testnet"
 source_url = "https://horizon-testnet.stellar.org/accounts/GCI76XDVHDGJMZGP5EWQYCZCYIBNBVABLPHWCKEZWJF2K4Z5SD74A4AV"

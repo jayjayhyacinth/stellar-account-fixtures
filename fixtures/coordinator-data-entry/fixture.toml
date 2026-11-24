@@ -2,7 +2,7 @@
 schema_version = 1
 id = "coordinator-data-entry"
 kind = "captured"
-scenario = "one data entry named config.multisig.coordinator, nine signers with the master key at weight 0 and all three thresholds at 2, the shape a hosted multisig coordinator leaves on chain"
+scenario = "one data entry named config.multisig.coordinator, multiple signers with the master key at weight zero and equal nonzero thresholds, the shape a hosted multisig coordinator leaves on chain"
 account_id = "GAUA7XL5K54CC2DDGP77FJ2YBHRJLT36CPZDXWPM6MP7MANOGG77PNJU"
 network = "public"
 source_url = "https://horizon.stellar.org/accounts/GAUA7XL5K54CC2DDGP77FJ2YBHRJLT36CPZDXWPM6MP7MANOGG77PNJU"

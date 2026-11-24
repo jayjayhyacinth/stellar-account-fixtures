@@ -27,6 +27,10 @@ from pathlib import Path
 
 SCHEMA_VERSION = 1
 SCENARIO_MAX = 200
+SCENARIO_COUNT_PROBLEM = (
+    "scenario must not contain numeric counts; describe intent in plain words"
+)
+COUNT_PATTERN = re.compile(r"\b\d+\b")
 BASE_KEYS = {
     "schema_version",
     "id",
@@ -157,6 +161,8 @@ def scenario_error(scenario: object) -> str | None:
         return f"scenario must be at most {SCENARIO_MAX} characters"
     if not scenario.isprintable():
         return "scenario must be a single printable line with no control characters"
+    if COUNT_PATTERN.search(scenario):
+        return SCENARIO_COUNT_PROBLEM
     return None
 
 

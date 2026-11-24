@@ -1,6 +1,6 @@
 # ROADMAP: Stellar account fixtures
 
-Last updated: 2026-11-24 03:30 UTC
+Last updated: 2026-11-24 07:05 UTC
 
 A corpus of public Stellar account reads, their provenance, and the validator that keeps
 the provenance honest. Nothing here is a claim about whether an account is well
@@ -34,11 +34,11 @@ empty gap list is gate G2.
 <!-- PROGRESS:START -->
 | Phase | Name | Done | Total | Progress |
 |---|---|---|---|---|
-| 0 | Ground truth | 5 | 6 | 83% |
+| 0 | Ground truth | 6 | 6 | 100% |
 | 1 | Repository wrapper | 10 | 10 | 100% |
 | 2 | Coverage | 35 | 38 | 92% |
 | 3 | Consumer contract | 3 | 4 | 75% |
-| **All phases** | **Readiness total** | **53** | **58** | **91%** |
+| **All phases** | **Readiness total** | **54** | **58** | **93%** |
 | Gates | G1 to G5 | 2 | 5 | 40% |
 <!-- PROGRESS:END -->
 
@@ -109,7 +109,7 @@ python3 scripts/roadmap_progress.py --check ROADMAP.md
 - [x] **0.3** Refuse seed strings at both ends: `tools/capture.py` will not write a response containing a seed-shaped string, `validate.py` scans both files of every fixture, and the test suite builds its seed-shaped samples from zero bytes at run time. M. Deps: 0.2. Done when: a decodable seed and a seed-shaped fake each produce a distinct problem line. (done 2026-11-02: `SeedRefusal`, four cases; the decodable one says "and its checksum verifies" and the fake one does not)
 - [x] **0.4** Capture six mainnet accounts with full provenance. M. Deps: 0.1, 0.2, 0.3. Done when: six directories validate, each sidecar names the URL, UTC capture second, `last_modified_ledger`, Horizon version and the SHA-256 of the bytes beside it. (done 2026-11-02: read from `horizon.stellar.org` on Horizon 30.0.0 at ledgers 65266813 to 65266866, all six pass `validate.py` and `test_the_shipped_corpus_validates`)
 - [x] **0.5** The shape vocabulary: labels declared in the sidecar and re-derived from the account bytes, so a label cannot drift from the capture it describes. M. Deps: 0.1. Done when: `--report` prints the derived set for each fixture and a declared label the bytes do not support is a problem. (done 2026-11-02: 24 labels in `SCHEMA.md` 5, `DeclaredShapeVersusBytes` proves both directions, and `tools/capture.py` now labels a new capture from `shapes_of()` rather than by hand)
-- [ ] **0.6** `scenario` is free prose and the validator cannot check it. One of the six already drifted: `issuer-auth-required` said "152 sponsorships" where `num_sponsoring` is 150, corrected in the commit that adds this line. Decide whether scenario text loses its numbers or gains a check. S. Deps: 0.5. Done when: either no sidecar `scenario` contains a count, or a test proves the counts in them. **Issue:** #7.
+- [x] **0.6** `scenario` is free prose and the validator cannot check it. One of the six already drifted: `issuer-auth-required` said "152 sponsorships" where `num_sponsoring` is 150, corrected in the commit that adds this line. Decide whether scenario text loses its numbers or gains a check. S. Deps: 0.5. Done when: either no sidecar `scenario` contains a count, or a test proves the counts in them. **Issue:** #7. (done 2026-11-24: decided that scenario prose loses its counts; `validate.py` and `tools/capture.py` refuse numeric counts in scenario, all nine fixture sidecars swept to plain words, verified by `tests/test_schema_scenario_counts.py`)
 
 ### Phase 1: Repository wrapper
 
@@ -186,6 +186,7 @@ python3 scripts/roadmap_progress.py --check ROADMAP.md
 
 | When | What | Tasks |
 |---|---|---|
+| 2026-11-24 07:05 | Task 0.6 (closing #7): decide whether scenario prose keeps its numbers; refuse numeric counts in scenario prose across validate.py and tools/capture.py, sweep all nine fixture sidecars to plain words, and enforce via tests/test_schema_scenario_counts.py. | 0.6 |
 | 2026-11-23 17:31 | Four validator suites and one rule (closing #79, #82, #83, #85): the nested-directory blind spot is pinned in both directions, duplicate `fixture.toml` keys are shown to arrive as `sidecar is not valid TOML` rather than a traceback, `check_captured` now refuses a sidecar ledger below the account's `last_modified_ledger` and the nine shipped fixtures still pass, and the CLI's stdout/stderr/exit split is driven as a subprocess over success, report, problem and unreadable-root corpora. | 2.31, 2.32, 2.33, 2.34 |
 | 2026-11-23 17:18 | Two suites pinned rather than described (pull request #146): `tests/test_validate_duplicate_json_keys.py` records that `json.loads` keeps the last of two duplicate `home_domain` keys in `account.json`, that shape derivation reads that surviving value, and that `validate.py` still hashes the original bytes, so the behaviour is pinned without claiming key uniqueness is enforced; `tests/test_validate_corpus_identity.py` audits all nine shipped captures, tying each `fixture.toml` id to its directory, its network to the root document for that network, and its `account_id` to the bytes beside it. No validator, tool or fixture changed and no task is ticked. | none ticked |
 | 2026-11-23 11:14 | Tasks 2.27 to 2.30 (closing #41, #42, #43, #44): add fixture by shape label matrix in corpus/shape-matrix.md (#41), compile consolidated provenance table in corpus/provenance.md (#42), document signer structures and master key presence in corpus/signers.md (#43), and create threshold combination matrix in corpus/thresholds.md (#44). Verified by new test suites with zero em dashes. | 2.27, 2.28, 2.29, 2.30 |

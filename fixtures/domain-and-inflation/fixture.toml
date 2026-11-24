@@ -2,7 +2,7 @@
 schema_version = 1
 id = "domain-and-inflation"
 kind = "captured"
-scenario = "home_domain lobstr.co with an inflation destination and two sponsorships, a well-formed SEP-1 candidate"
+scenario = "home_domain lobstr.co with an inflation destination and sponsorships, a well-formed SEP candidate"
 account_id = "GB4UOCL7R5UZQ3C7HM4VNFHB6GGTFDQZ2WEQUTXTDXLXY3UUXKXYV2X6"
 network = "public"
 source_url = "https://horizon.stellar.org/accounts/GB4UOCL7R5UZQ3C7HM4VNFHB6GGTFDQZ2WEQUTXTDXLXY3UUXKXYV2X6"
