@@ -85,7 +85,7 @@ seed-shaped string (`S...`) is refused by both the capture tool and the validato
 | Indicator | Value | Source |
 |---|---|---|
 | Verified Captures | **9 accounts** (8 Mainnet, 1 Test) | `fixtures/` |
-| Test Suite | **295 passing** | `python -m unittest` |
+| Test Suite | **301 passing** | `python -m unittest` |
 | Integrity Assurance | **SHA-256 sidecars verified** | `validate.py` |
 | Safety Invariant | **Zero secret keys (`S...`)** | Validator enforced |
 <!-- METRICS:END -->
@@ -170,8 +170,9 @@ checks key presence rather than signing authority). The three remaining auth fla
 roadmap 2.5 asks for one flag per account rather than one issuer carrying all three;
 `auth_required` has had a fixture since 2026-11-02. `no_balances` has not appeared in any
 read taken for this corpus: every account fetched while hunting these shapes, on both
-networks, carries at least its native balance, so 2.3 may end in a decision that the label
-stays uncovered rather than in a capture. `has_data`, `sponsored` and the first testnet
+networks, carries at least its native balance due to Stellar protocol reserve requirements, so 2.3
+ended in decision D-06 that the label stays uncovered on live networks rather than in a fabricated
+capture. `has_data`, `sponsored` and the first testnet
 capture arrived on 2026-11-03 as roadmap 2.1, 2.2 and 2.6. None of the remaining six is
 quietly worked around with synthetic data: a synthetic fixture is allowed by the schema and
 none is shipped, so every number in this section describes a real read.
