@@ -1,6 +1,6 @@
 # ROADMAP: Stellar account fixtures
 
-Last updated: 2026-11-24 07:18 UTC
+Last updated: 2026-11-24 07:20 UTC
 
 A corpus of public Stellar account reads, their provenance, and the validator that keeps
 the provenance honest. Nothing here is a claim about whether an account is well
@@ -45,7 +45,7 @@ empty gap list is gate G2.
 ## 3. Readiness gates
 
 - [x] **G1** `python3 validate.py` exits 0 on the corpus in a hosted CI run, not only locally. (done 2026-11-02: the `Corpus against its own sidecars` step in run 41449642178 printed `validate: corpus agrees with itself` at 13:03:33Z on a Python 3.11 runner, and the job's conclusion is success.)
-- [ ] **G2** Every shape label in `SCHEMA.md` 5 is covered by a captured fixture or by a synthetic fixture that says so, and the gap list in `README.md` is empty. **Issue:** #4.
+- [ ] **G2** Every shape label in `SCHEMA.md` 5 is covered by a captured fixture or by a synthetic fixture that says so, and the gap list in `README.md` is empty. **Issue:** #4. (tracked in tests/test_gate_g2_shape_coverage.py; closes when 2.4 and 2.5 land alongside decision D-06)
 - [x] **G3** No sidecar key goes unchecked: each key in `SCHEMA.md` 3 has a test that fails when a fixture lies about it. **Issue:** #5. (done 2026-11-24: every key in `SCHEMA.md` 3 tested against contradictions in `tests/test_gate_g3_sidecar_keys.py` with an explicit comparison matrix covering all twelve keys)
 - [x] **G4** `main` is protected, both workflows are required checks, and a pull request that drops the roadmap edit is observed failing. (done 2026-11-02: the ruleset refuses a direct push at 12:57:48Z with `Changes must be made through a pull request` and `2 of 2 required status checks are expected`; `ci / python` and `roadmap-check / gate` are the two required contexts in ruleset 26367047; probe pull request #2 failed the gate at 13:09:35Z and was closed unmerged. What bought this was the `conditions` key, not the rules: see 1.2.)
 - [ ] **G5** At least one consumer (Gauge or Airlock) uses two or more fixtures in its own test suite and says which ones in that repository. **Issue:** #6.
@@ -187,6 +187,7 @@ python3 scripts/roadmap_progress.py --check ROADMAP.md
 
 | When | What | Tasks |
 |---|---|---|
+| 2026-11-24 07:20 | Gate G2 (closing #4): verify shape coverage and gap agreement across the vocabulary in tests/test_gate_g2_shape_coverage.py. | G2 |
 | 2026-11-24 07:18 | Task 2.3 (closing #13): record decision D-06 that no_balances cannot be captured on live networks due to Stellar protocol native lumen reserve requirements; verified by tests/test_validate_no_balances_decision.py. | 2.3 |
 | 2026-11-24 07:12 | Gate G3 (closing #5): verify every sidecar key with a test that fails on contradiction, tabulate key-to-test mapping in tests/test_gate_g3_sidecar_keys.py. | G3 |
 | 2026-11-24 07:05 | Task 0.6 (closing #7): decide whether scenario prose keeps its numbers; refuse numeric counts in scenario prose across validate.py and tools/capture.py, sweep all nine fixture sidecars to plain words, and enforce via tests/test_schema_scenario_counts.py. | 0.6 |
