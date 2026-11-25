@@ -5,21 +5,23 @@ The purpose of Gate G3 is to prove coverage of the sidecar claim set itself: for
 defined in SCHEMA.md Section 3, there must be a test that goes red when a fixture states
 something that contradicts the account record, schema, or disk bytes.
 
-Comparison Table: Sidecar Key to Failing Test Matrix (SCHEMA.md Section 3)
-| Key | Schema Status | Contradiction / Lie Tested | Expected Failure Diagnostic | Test Method |
-|---|---|---|---|---|
-| `schema_version` | Required | Declares schema version 2 | schema_version 2, this tool reads 1 | `test_key_schema_version_contradiction_fails` |
-| `id` | Required | ID differs from directory name | does not match its directory name | `test_key_id_contradiction_fails` |
-| `kind` | Required | Synthetic kind claiming provenance | synthetic fixture carries provenance it cannot have | `test_key_kind_contradiction_fails` |
-| `scenario` | Required | Prose containing numeric count | scenario must not contain numeric counts | `test_key_scenario_contradiction_fails` |
-| `account_id` | Required | Sidecar account id differs from account.json | account.json describes ... sidecar says ... | `test_key_account_id_contradiction_fails` |
-| `network` | Required | Network host differs from source_url | source_url ... should be ... | `test_key_network_contradiction_fails` |
-| `shape` | Required | Shape claims not_sponsored when sponsored | declared shape 'not_sponsored' is not what account.json shows | `test_key_shape_contradiction_fails` |
-| `source_url` | Required | Points to wrong endpoint/resource | source_url ... should be ... | `test_key_source_url_contradiction_fails` |
-| `captured_at` | Required | Future timestamp | captured_at ... is in the future | `test_key_captured_at_contradiction_fails` |
-| `ledger` | Required | Ledger predates last_modified_ledger | sidecar ledger ... predates last_modified_ledger | `test_key_ledger_contradiction_fails` |
-| `horizon_version` | Required | Empty horizon version | horizon_version is empty; the capture must say what served it | `test_key_horizon_version_contradiction_fails` |
-| `sha256` | Required | Hash does not match account.json bytes | sha256 does not match account.json | `test_key_sha256_contradiction_fails` |
+Comparison table: every SCHEMA.md Section 3 key and the test that fails when a fixture
+contradicts it:
+
+| Key | Failing test |
+|---|---|
+| `schema_version` | `test_key_schema_version_contradiction_fails` |
+| `id` | `test_key_id_contradiction_fails` |
+| `kind` | `test_key_kind_contradiction_fails` |
+| `scenario` | `test_key_scenario_contradiction_fails` |
+| `account_id` | `test_key_account_id_contradiction_fails` |
+| `network` | `test_key_network_contradiction_fails` |
+| `shape` | `test_key_shape_contradiction_fails` |
+| `source_url` | `test_key_source_url_contradiction_fails` |
+| `captured_at` | `test_key_captured_at_contradiction_fails` |
+| `ledger` | `test_key_ledger_contradiction_fails` |
+| `horizon_version` | `test_key_horizon_version_contradiction_fails` |
+| `sha256` | `test_key_sha256_contradiction_fails` |
 """
 
 from __future__ import annotations
@@ -29,7 +31,6 @@ import json
 import re
 import sys
 import tempfile
-import tomllib
 import unittest
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -61,20 +62,26 @@ PEER_ID = "GCI76XDVHDGJMZGP5EWQYCZCYIBNBVABLPHWCKEZWJF2K4Z5SD74A4AV"
 WHERE = "fixtures/plain"
 
 
+def write_root_document(corpus_dir: Path, network: str) -> None:
+    """Write a root document and the sha256 sidecar validate.py requires for it."""
+    document = json.dumps({"network_passphrase": validate.NETWORKS[network][1]}) + "\n"
+    (corpus_dir / f"root-{network}.json").write_text(document, encoding="utf-8")
+    digest = hashlib.sha256(document.encode()).hexdigest()
+    host = "horizon.stellar.org" if network == "public" else "horizon-testnet.stellar.org"
+    (corpus_dir / f"root-{network}.toml").write_text(
+        f'url = "https://{host}/"\ncaptured_at = "2026-11-25T00:00:00Z"\nsha256 = "{digest}"\n',
+        encoding="utf-8",
+    )
+
+
 class GateG3SidecarKeysTest(unittest.TestCase):
     def setUp(self) -> None:
         self.stage = tempfile.TemporaryDirectory(prefix="gate-g3-test-")
         self.addCleanup(self.stage.cleanup)
         self.root = Path(self.stage.name)
         (self.root / "corpus").mkdir()
-        (self.root / "corpus" / "root-public.json").write_text(
-            json.dumps({"network_passphrase": validate.NETWORKS["public"][1]}) + "\n",
-            encoding="utf-8",
-        )
-        (self.root / "corpus" / "root-testnet.json").write_text(
-            json.dumps({"network_passphrase": validate.NETWORKS["testnet"][1]}) + "\n",
-            encoding="utf-8",
-        )
+        write_root_document(self.root / "corpus", "public")
+        write_root_document(self.root / "corpus", "testnet")
         self.account: dict[str, object] = {
             "account_id": ACCOUNT_ID,
             "sequence": "100",
@@ -176,7 +183,9 @@ class GateG3SidecarKeysTest(unittest.TestCase):
 
     def test_key_scenario_contradiction_fails(self) -> None:
         self.write_fixture({"scenario": "an account with 100 sponsorships"})
-        self.assert_problem("scenario must not contain numeric counts; describe intent in plain words")
+        self.assert_problem(
+            "scenario must not contain numeric counts; describe intent in plain words"
+        )
 
     def test_key_account_id_contradiction_fails(self) -> None:
         self.write_fixture({"account_id": PEER_ID})

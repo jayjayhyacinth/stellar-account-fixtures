@@ -19,6 +19,7 @@ sys.path.insert(0, str(REPO_ROOT))
 sys.path.insert(0, str(REPO_ROOT / "tools"))
 
 import capture  # noqa: E402
+
 import validate  # noqa: E402
 
 WHERE = "fixtures/plain"
@@ -32,9 +33,12 @@ class SchemaScenarioCountsTest(unittest.TestCase):
 
     def test_scenario_with_digit_counts_is_rejected(self) -> None:
         bad_scenarios = [
-            "an issuer account with auth_required set, two signers at weight 1 and 150 sponsored entries",
-            "an issuer account with auth_required set, two signers at weight 1 and 152 sponsorships",
-            "37 trustlines and a home domain, the account shape that makes a naive response body large",
+            "an issuer account with auth_required set, two signers at weight 1 and 150 sponsored "
+            "entries",
+            "an issuer account with auth_required set, two signers at weight 1 and 152 "
+            "sponsorships",
+            "37 trustlines and a home domain, the account shape that makes a naive response body "
+            "large",
             "nine signers with the master key at weight 0 and all three thresholds at 2",
             "num_sponsored 17 against num_sponsoring 0: seventeen balances",
             "six signers on testnet, master weight 0 and all three thresholds at 3",
@@ -47,12 +51,20 @@ class SchemaScenarioCountsTest(unittest.TestCase):
 
     def test_scenario_in_plain_words_is_accepted(self) -> None:
         good_scenarios = [
-            "an issuer account with auth_required set, two signers at weight one and sponsored entries",
-            "many trustlines and a home domain, the account shape that makes a naive response body large",
-            "one signer which is the master key at weight one, all thresholds zero and no optional fields",
-            "home_domain lobstr.co with an inflation destination and sponsorships, a well-formed SEP candidate",
-            "two signers, master weight two and nonzero thresholds, the shape a shared custody account leaves on chain",
-            "synthetic: fabricated empty balances list to exercise offline rule logic without live capture",
+            "an issuer account with auth_required set, two signers at weight one and sponsored "
+            "entries",
+            "many trustlines and a home domain, the account shape that makes a naive response body "
+            "large",
+            "one signer which is the master key at weight one, all thresholds zero and no optional "
+            "fields",
+            "home_domain lobstr.co with an inflation destination and sponsorships, a well-formed "
+            "SEP candidate",
+            "two signers, master weight two and nonzero thresholds, the shape a shared custody "
+            "account leaves on chain",
+            "synthetic: fabricated empty balances list to exercise offline rule logic without live "
+            "capture",
+            "home_domain carries uppercase characters StellarHQ.io to test SEP-1 case-folding "
+            "discovery in consumers",
         ]
         for sc in good_scenarios:
             with self.subTest(scenario=sc):

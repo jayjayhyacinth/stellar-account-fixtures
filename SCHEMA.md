@@ -12,6 +12,7 @@ fixtures/<fixture-id>/
   fixture.toml      the sidecar: what this is, where it came from, what shape it has
 corpus/
   root-<network>.json  the Horizon root document captured alongside the fixture
+  root-<network>.toml  provenance for that document: url, capture time, sha256
 tools/
   capture.py        writes a new captured fixture and its root document
 validate.py         checks the whole tree against this schema
@@ -34,8 +35,9 @@ that has been edited is a fixture whose provenance claim is a lie. LF line endin
 Consequences worth stating plainly:
 
 - Field names and shapes follow Horizon, so they can change when Horizon changes. A
-  `--update` re-capture is how a fixture is refreshed; the ledger number in the sidecar
-  is what tells you how old the bytes are.
+   `--update` re-capture is how a fixture is refreshed; the ledger number in the sidecar
+   is what tells you how old the bytes are, and an update that would move that ledger
+   backwards is refused.
 - The capture is a point-in-time read. An account that was multisig at ledger 65266865
   can be single-signer tomorrow. Do not treat `last_modified_ledger` as decorative.
 - `data` is present in some captures and empty in others. Empty means the account has no
@@ -51,7 +53,7 @@ schema does not define is a key no consumer will read.
 | `schema_version` | required | required | Integer. This corpus is `1`; see section 7. |
 | `id` | required | required | Kebab-case, equal to the directory name. |
 | `kind` | required | required | `captured` or `synthetic`. |
-| `scenario` | required | required | One printable, single-line sentence on what the shape is for, in plain words, at most 200 characters; no control characters or newlines; no numeric counts. |
+| `scenario` | required | required | One printable, single-line sentence on what the shape is for, in plain words, at most 200 characters; no control characters or newlines. |
 | `account_id` | required | required | `G...` ed25519 account id, checksum included. |
 | `network` | required | required | `public` or `testnet`. |
 | `shape` | required | required | Sorted list of the labels in section 5, each label at most once. |
@@ -162,7 +164,7 @@ consumer can pick fixtures by what they contain without re-implementing Horizon 
 | `not_sponsored` | `num_sponsored` is 0 |
 | `sponsoring` | `num_sponsoring` is greater than 0 |
 | `not_sponsoring` | `num_sponsoring` is 0 |
-| `no_balances` | `balances` is an empty list |
+| `no_balances` | `balances` is an empty list; Horizon always returns at least the native entry, so only a synthetic fixture can carry it |
 | `many_balances` | `balances` has 10 or more entries |
 
 Two reading notes:
@@ -177,9 +179,9 @@ Two reading notes:
   validator concern, not a crash.
 
 `scenario` is one printable, single-line sentence of at most 200 characters. `validate.py`
-refuses control characters, newlines, non-string values, longer text, and numeric counts,
-and `tools/capture.py` refuses the same values before it makes a request. Keep numbers out
-of it: it describes why a fixture exists in plain words, and `shape` is the machine-readable
+refuses control characters, newlines, non-string values and longer text, and
+`tools/capture.py` refuses the same values before it makes a request. Keep the numbers in
+it out of the way: it describes why a fixture exists, and `shape` is the machine-readable
 part.
 
 ## 6. Root documents
@@ -230,6 +232,23 @@ Failure to satisfy the contract results in specific validator error conditions:
    `not a JSON object`
 4. **Passphrase Mismatch**: If `network_passphrase` does not match the hardcoded network constant:
    `network_passphrase '<observed>' is not the <network> passphrase`
+
+### Root document provenance
+
+Each root document has a companion `corpus/root-<network>.toml`, written by
+`tools/capture.py` from the same read. It is flat TOML, one section, LF line endings, and
+ends with a newline. It has exactly three keys: `url` is the endpoint root URL that was
+read, `captured_at` has the same `YYYY-MM-DDTHH:MM:SSZ` UTC form as a fixture sidecar,
+and `sha256` is the digest of the exact bytes of the root document on disk.
+
+`validate.py` checks every referenced root document against its companion before it
+parses the document. A sidecar that is missing reports
+`missing; every root document must have a sha256 sidecar`. A digest that does not match
+the bytes reports `sha256 does not match root document (bytes say <first twelve hex>...)`.
+Unknown keys, missing keys, CRLF line endings, a bad timestamp and a malformed sidecar
+are problems on `corpus/root-<network>.toml`, named by key or line where the parser can
+name one. Editing a root document without updating its digest is therefore a validation
+failure, the same as editing `account.json` without updating its fixture sidecar.
 
 ## 7. Versioning
 

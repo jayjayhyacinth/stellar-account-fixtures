@@ -19,6 +19,7 @@ import hashlib
 import http.server
 import json
 import shutil
+import subprocess
 import sys
 import tempfile
 import threading
@@ -146,6 +147,15 @@ def root_document(**overrides) -> dict:
     return document
 
 
+def root_sidecar_text(url: str, body: bytes) -> str:
+    return (
+        "# Specimen root sidecar.\n"
+        f'url = "{url}"\n'
+        f'captured_at = "{CAPTURED_AT}"\n'
+        f'sha256 = "{hashlib.sha256(body).hexdigest()}"\n'
+    )
+
+
 class Fixture:
     """One fixture directory: the account bytes and the sidecar that describes them."""
 
@@ -216,8 +226,10 @@ class Scratch(unittest.TestCase):
         self.fixtures: dict[str, Fixture] = {}
         self.add_fixture("plain")
         (self.root / "corpus").mkdir()
-        (self.root / "corpus" / "root-public.json").write_text(
-            pretty(root_document()), encoding="utf-8"
+        root_body = pretty(root_document()).encode("utf-8")
+        (self.root / "corpus" / "root-public.json").write_bytes(root_body)
+        (self.root / "corpus" / "root-public.toml").write_text(
+            root_sidecar_text(ENDPOINT + "/", root_body), encoding="utf-8"
         )
 
     def add_fixture(self, name: str, **account_overrides) -> Fixture:
@@ -315,7 +327,8 @@ class SidecarKeysAndTypes(Scratch):
     def test_scenario_with_numeric_counts_is_refused(self) -> None:
         self.break_manifest(
             'scenario = "an account whose optional fields are all absent"',
-            'scenario = "an issuer account with auth_required set, two signers at weight 1 and 150 sponsored entries"',
+            'scenario = "an issuer account with auth_required set, two signers at weight 1 '
+            'and 150 sponsored entries"',
         )
         self.assert_problem(
             "scenario must not contain numeric counts; describe intent in plain words"
@@ -608,6 +621,21 @@ class RootDocument(Scratch):
     def test_a_root_document_that_is_not_an_object(self) -> None:
         self.root_path().write_text("[]\n", encoding="utf-8")
         self.assert_problem("corpus/root-public.json: not a JSON object")
+
+    def test_a_changed_root_document_is_caught_by_its_sidecar(self) -> None:
+        changed = pretty(root_document()).replace("22.2.1", "22.2.2")
+        self.root_path().write_text(changed, encoding="utf-8")
+        self.assert_problem("sha256 does not match root document")
+
+    def test_a_missing_root_sidecar_is_named(self) -> None:
+        (self.root / "corpus" / "root-public.toml").unlink()
+        self.assert_problem(validate.ROOT_SIDECAR_MISSING)
+
+    def test_a_root_sidecar_with_a_bad_digest_is_named(self) -> None:
+        path = self.root / "corpus" / "root-public.toml"
+        text = path.read_text(encoding="utf-8")
+        path.write_text(text.replace("sha256 = ", "sha256 = x"), encoding="utf-8")
+        self.assert_problem("root sidecar is not valid TOML")
 
     def test_an_unknown_network_with_a_file_of_its_own_does_not_crash(self) -> None:
         """The network set is closed, so there is no passphrase to look up."""
@@ -988,6 +1016,30 @@ class SidecarFormat(unittest.TestCase):
             shape=["thresholds_zero", "no_data"],
         )
         self.assertIn('shape = ["no_data", "thresholds_zero"]\n', written)
+
+
+class ManifestCorpusAssertionTest(unittest.TestCase):
+    """The manifest is a consumer's pin, so it is driven over the real tree."""
+
+    def test_one_line_per_fixture(self) -> None:
+        cmd = [sys.executable, str(ROOT / "tools" / "manifest.py")]
+        res = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        lines = [line.strip() for line in res.stdout.splitlines() if line.strip()]
+        fixtures = [
+            p
+            for p in (ROOT / "fixtures").iterdir()
+            if p.is_dir() and (p / "fixture.toml").is_file()
+        ]
+        self.assertEqual(len(lines), len(fixtures))
+
+    def test_the_order_is_the_fixture_order_and_reproducible(self) -> None:
+        cmd = [sys.executable, str(ROOT / "tools" / "manifest.py")]
+        first = subprocess.run(cmd, capture_output=True, text=True, check=True).stdout
+        second = subprocess.run(cmd, capture_output=True, text=True, check=True).stdout
+        self.assertEqual(first, second)
+        records = [json.loads(line) for line in first.splitlines() if line.strip()]
+        ids = [r["id"] for r in records]
+        self.assertEqual(ids, sorted(ids))
 
 
 if __name__ == "__main__":
